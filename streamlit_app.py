@@ -13,19 +13,19 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 try:
-    import streamlit as st
+    import streamlit as st  # type: ignore
 except ImportError:
-    st = None  # type: ignore
+    st = None
 
 import pandas as pd
 import numpy as np
 
 try:
-    import plotly.graph_objects as go
-    import plotly.express as px
+    import plotly.graph_objects as go  # type: ignore
+    import plotly.express as px  # type: ignore
 except ImportError:
-    go = None  # type: ignore
-    px = None  # type: ignore
+    go = None
+    px = None
 
 if st is None or go is None:
     if __name__ == "__main__":
