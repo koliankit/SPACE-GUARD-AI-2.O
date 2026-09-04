@@ -19,13 +19,23 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 5000,
+  timeout: 2000,
 });
 
 // Helper to verify if response is genuine JSON and not Vercel SPA HTML fallback
 function isValidApiResponse<T>(res: AxiosResponse<T>): boolean {
   if (!res || !res.data) return false;
-  if (typeof res.data === 'string' && (res.data as string).trim().startsWith('<!doctype html>')) {
+  // If the response is a string (e.g. HTML from Vercel rewrite or <!DOCTYPE>), it's not valid API JSON
+  if (typeof res.data === 'string') {
+    return false;
+  }
+  // Check headers for text/html fallback
+  const contentType = res.headers && (res.headers['content-type'] || res.headers['Content-Type']);
+  if (typeof contentType === 'string' && contentType.toLowerCase().includes('text/html')) {
+    return false;
+  }
+  // All our API payloads are objects or arrays
+  if (typeof res.data !== 'object') {
     return false;
   }
   return true;
