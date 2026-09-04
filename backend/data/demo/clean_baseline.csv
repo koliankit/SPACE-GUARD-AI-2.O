@@ -1,0 +1,17 @@
+component_id,subsystem,lot_id,parameter,0h,24h,96h,168h,datasheet_limit
+COMP-FC-01,Flight Computer,LOT-12,Leakage Current,20.1,20.3,20.6,20.9,50.0
+COMP-FC-02,Flight Computer,LOT-12,Leakage Current,19.9,20.2,20.5,20.8,50.0
+COMP-FC-04,Flight Computer,LOT-12,Leakage Current,20.2,20.4,20.7,21.0,50.0
+COMP-FC-05,Flight Computer,LOT-12,Leakage Current,19.8,20.1,20.4,20.7,50.0
+COMP-PWR-01,Power System,LOT-08,Quiescent Current,12.1,12.2,12.4,12.6,30.0
+COMP-PWR-03,Power System,LOT-08,Quiescent Current,12.0,12.2,12.3,12.5,30.0
+COMP-PWR-04,Power System,LOT-08,Quiescent Current,11.9,12.1,12.3,12.5,30.0
+COMP-BAT-01,Battery Module,LOT-09,Internal Resistance,42.0,42.4,42.8,43.2,80.0
+COMP-BAT-02,Battery Module,LOT-09,Internal Resistance,41.8,42.2,42.6,43.0,80.0
+COMP-COM-01,Communication Module,LOT-15,Frequency Drift,2.1,2.2,2.3,2.4,10.0
+COMP-COM-03,Communication Module,LOT-15,Frequency Drift,2.0,2.1,2.2,2.3,10.0
+COMP-NAV-01,Navigation Unit,LOT-04,Bias Stability,0.12,0.12,0.13,0.13,0.50
+COMP-NAV-02,Navigation Unit,LOT-04,Bias Stability,0.11,0.12,0.12,0.13,0.50
+COMP-TEL-01,Telemetry Module,LOT-11,Bit Error Rate,0.01,0.01,0.01,0.02,0.10
+COMP-THM-01,Thermal Control,LOT-03,Thermal Resistance,1.4,1.4,1.4,1.5,3.0
+COMP-PAY-01,Payload,LOT-07,Dark Current,4.2,4.3,4.3,4.5,15.0

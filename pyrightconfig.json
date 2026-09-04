@@ -1,4 +1,9 @@
 {
   "reportMissingImports": false,
-  "reportMissingModuleSource": false
+  "reportMissingModuleSource": false,
+  "exclude": [
+    "**/__pyrefly_virtual__/**",
+    "**/node_modules/**",
+    "**/.venv/**"
+  ]
 }

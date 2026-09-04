@@ -1,0 +1,4 @@
+component_id,subsystem,lot_id,parameter,0h,24h,96h,168h,datasheet_limit
+COMP-FC-01,Flight Computer,LOT-12,Leakage Current,20.1,,,,50.0
+COMP-PWR-01,Power System,LOT-08,Quiescent Current,,12.3,,,30.0
+COMP-COM-01,Communication Module,LOT-15,Frequency Drift,,,2.4,,10.0
