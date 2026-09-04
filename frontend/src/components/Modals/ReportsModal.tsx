@@ -31,12 +31,30 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
       const res = await api.generateReport(activeAnalysisId);
       setGenerateMsg(res.message);
       onRefreshReports();
-      // Auto-trigger download
-      window.open(res.report_url, '_blank');
+      if (res.report_url && res.report_url !== '#') {
+        // Trigger direct file download
+        const a = document.createElement('a');
+        a.href = res.report_url;
+        a.download = `SPACEGUARD_Screening_Report_${activeAnalysisId.slice(0, 8)}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Open in new tab with print/save as PDF button
+        window.open(res.report_url, '_blank');
+      }
     } catch (err: any) {
       setGenerateMsg('Failed to generate report: ' + (err.response?.data?.detail || err.message));
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleDownloadReport = async (rep: ReportSummary) => {
+    try {
+      await api.downloadReport(rep.id, rep.analysis_run_id);
+    } catch (err: any) {
+      setGenerateMsg('Download error: ' + err.message);
     }
   };
 
@@ -120,15 +138,14 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
                       </div>
                     </div>
 
-                    <a
-                      href={`/api/v1/reports/download/${rep.id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-2.5 py-1 rounded bg-space-800 hover:bg-space-700 text-cyber-cyan font-mono text-xs border border-slate-700 flex items-center space-x-1 transition"
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadReport(rep)}
+                      className="px-2.5 py-1 rounded bg-space-800 hover:bg-space-700 text-cyber-cyan font-mono text-xs border border-slate-700 flex items-center space-x-1 transition cursor-pointer"
                     >
                       <Download className="w-3 h-3" />
                       <span>DOWNLOAD</span>
-                    </a>
+                    </button>
                   </div>
                 ))}
               </div>
