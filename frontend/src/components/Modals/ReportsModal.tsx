@@ -20,6 +20,7 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateMsg, setGenerateMsg] = useState<string | null>(null);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -27,21 +28,20 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
     if (!activeAnalysisId) return;
     setIsGenerating(true);
     setGenerateMsg(null);
+    setDownloadUrl(null);
     try {
       const res = await api.generateReport(activeAnalysisId);
       setGenerateMsg(res.message);
       onRefreshReports();
       if (res.report_url && res.report_url !== '#') {
-        // Trigger direct file download
+        setDownloadUrl(res.report_url);
+        // Direct browser file download of .pdf
         const a = document.createElement('a');
         a.href = res.report_url;
-        a.download = `SPACEGUARD_Screening_Report_${activeAnalysisId.slice(0, 8)}.html`;
+        a.download = `SPACEGUARD_Report_${activeAnalysisId.slice(0, 8)}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-
-        // Open in new tab with print/save as PDF button
-        window.open(res.report_url, '_blank');
       }
     } catch (err: any) {
       setGenerateMsg('Failed to generate report: ' + (err.response?.data?.detail || err.message));
@@ -86,14 +86,14 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
                 OFFICIAL REPORT GENERATION
               </span>
               <span className="text-[11px] text-slate-400 font-mono">
-                Produces full PDF report with component matrices, lot z-scores, and AI diagnosis.
+                Produces official aerospace PDF report with component matrices, lot z-scores, and AI diagnosis.
               </span>
             </div>
 
             <button
               onClick={handleGenerateReport}
               disabled={isGenerating || !activeAnalysisId}
-              className="px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-600 to-cyber-blue hover:from-blue-500 hover:to-cyan-500 text-white font-mono text-xs font-bold transition flex items-center space-x-1.5 shadow-md disabled:opacity-50"
+              className="px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-600 to-cyber-blue hover:from-blue-500 hover:to-cyan-500 text-white font-mono text-xs font-bold transition flex items-center space-x-1.5 shadow-md disabled:opacity-50 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{isGenerating ? 'GENERATING PDF...' : 'GENERATE PDF REPORT'}</span>
@@ -101,8 +101,32 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
           </div>
 
           {generateMsg && (
-            <div className="p-2.5 rounded bg-space-850 border border-cyber-cyan/40 text-xs font-mono text-cyan-300">
-              {generateMsg}
+            <div className="p-3 rounded-lg bg-space-850 border border-cyber-cyan/40 text-xs font-mono text-cyan-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-inner">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{generateMsg}</span>
+              </div>
+              {downloadUrl && (
+                <div className="flex items-center space-x-2 self-end sm:self-auto">
+                  <a
+                    href={downloadUrl}
+                    download={`SPACEGUARD_Report_${activeAnalysisId?.slice(0, 8) || 'RUN'}.pdf`}
+                    className="px-3 py-1.5 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black font-bold rounded text-[11px] flex items-center space-x-1.5 shadow transition cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>DOWNLOAD PDF</span>
+                  </a>
+                  <a
+                    href={downloadUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1.5 bg-space-800 hover:bg-space-700 text-slate-200 rounded text-[11px] flex items-center space-x-1.5 border border-slate-700 transition cursor-pointer"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-cyber-cyan" />
+                    <span>VIEW</span>
+                  </a>
+                </div>
+              )}
             </div>
           )}
 

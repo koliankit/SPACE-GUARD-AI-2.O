@@ -14,6 +14,7 @@ import {
   StageMeasurement
 } from '../types';
 import { SATELLITE_COMPONENTS } from '../config/satelliteMapping';
+import { generateAerospacePdfBlob } from './pdfGenerator';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
@@ -1297,8 +1298,8 @@ export const api = {
       {
         id: 'rep-demo-01',
         analysis_run_id: analysisId || currentAnalysisId || 'run-sih-2026',
-        report_path: 'SPACEGUARD_Reliability_Screening_Report.html',
-        report_type: 'Aerospace Screening Report (HTML/PDF)',
+        report_path: 'SPACEGUARD_Reliability_Screening_Report.pdf',
+        report_type: 'Aerospace Screening Report (PDF)',
         created_at: new Date().toISOString(),
         total_components: 22,
         anomaly_count: 2,
@@ -1320,26 +1321,27 @@ export const api = {
     }
 
     const reportId = 'rep-' + Date.now();
-    const html = buildOfficialReportHtml(analysisId || currentAnalysisId || 'RUN-DEMO');
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const blobUrl = URL.createObjectURL(blob);
+    const activeAnalysis = currentAnalysis || buildDemoAnalysisResponse();
+    const dsName = clientDatasets[currentDatasetId]?.filename || 'Flight_BurnIn_Telemetry.csv';
+    const pdfBlob = generateAerospacePdfBlob(activeAnalysis, dsName);
+    const blobUrl = URL.createObjectURL(pdfBlob);
 
-    const summary = currentAnalysis?.summary || { total_components: 22, anomaly_count: 2 };
+    const summary = activeAnalysis.summary || { total_components: 22, anomalies: 2 };
     const reportItem: ReportSummary = {
       id: reportId,
       analysis_run_id: analysisId || currentAnalysisId || 'run-sih-2026',
-      report_path: `SPACEGUARD_Screening_Report_${reportId.slice(0, 8)}.html`,
-      report_type: 'Aerospace Screening Report (HTML/PDF)',
+      report_path: `SPACEGUARD_Report_${reportId.slice(0, 8)}.pdf`,
+      report_type: 'Aerospace Screening Report (PDF)',
       created_at: new Date().toISOString(),
       total_components: summary.total_components || 22,
-      anomaly_count: summary.anomaly_count || 2,
+      anomaly_count: summary.anomalies || 2,
       status: 'completed',
     };
 
     clientGeneratedReports[reportId] = {
       report: reportItem,
       blobUrl,
-      html,
+      html: '',
     };
 
     return {
@@ -1369,32 +1371,30 @@ export const api = {
     let cached = clientGeneratedReports[reportId];
     let url = cached?.blobUrl;
     if (!url) {
-      const html = buildOfficialReportHtml(analysisId || currentAnalysisId || 'RUN-DEMO');
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      url = URL.createObjectURL(blob);
-      const summary = currentAnalysis?.summary || { total_components: 22, anomaly_count: 2 };
+      const activeAnalysis = currentAnalysis || buildDemoAnalysisResponse();
+      const dsName = clientDatasets[currentDatasetId]?.filename || 'Flight_BurnIn_Telemetry.csv';
+      const pdfBlob = generateAerospacePdfBlob(activeAnalysis, dsName);
+      url = URL.createObjectURL(pdfBlob);
+      const summary = activeAnalysis.summary || { total_components: 22, anomalies: 2 };
       const reportItem: ReportSummary = {
         id: reportId,
         analysis_run_id: analysisId || currentAnalysisId || 'run-sih-2026',
-        report_path: `SPACEGUARD_Screening_Report_${reportId.slice(0, 8)}.html`,
-        report_type: 'Aerospace Screening Report (HTML/PDF)',
+        report_path: `SPACEGUARD_Report_${reportId.slice(0, 8)}.pdf`,
+        report_type: 'Aerospace Screening Report (PDF)',
         created_at: new Date().toISOString(),
         total_components: summary.total_components || 22,
-        anomaly_count: summary.anomaly_count || 2,
+        anomaly_count: summary.anomalies || 2,
         status: 'completed',
       };
-      clientGeneratedReports[reportId] = { report: reportItem, blobUrl: url, html };
+      clientGeneratedReports[reportId] = { report: reportItem, blobUrl: url, html: '' };
     }
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `SPACEGUARD_Screening_Report_${reportId.slice(0, 8)}.html`;
+    a.download = `SPACEGUARD_Report_${reportId.slice(0, 8)}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-
-    // Open printable window for instant viewing/printing
-    window.open(url, '_blank');
   },
 };
 
