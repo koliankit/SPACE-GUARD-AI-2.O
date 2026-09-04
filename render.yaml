@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: spaceguard-ai
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: DATABASE_URL
+        value: sqlite:///./spaceguard.db

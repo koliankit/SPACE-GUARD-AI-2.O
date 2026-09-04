@@ -1,0 +1,47 @@
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+build/
+.eslintcache
+
+# Python
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+
+# Local Storage & Database
+*.db
+*.sqlite3
+spaceguard.db
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/reports/*
+!backend/reports/.gitkeep
+backend/data/*
+!backend/data/.gitkeep
+
+# Submissions & Archives
+*.zip
+*.tar.gz
+
+# Environment Variables
+.env
+.env.local
+.env.production
+frontend/.env.local
+frontend/.env.production
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.vercel/

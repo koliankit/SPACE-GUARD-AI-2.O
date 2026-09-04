@@ -1,0 +1,47 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache & Artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+
+# Backend & Alternate Deployments (Render / Docker / Procfile)
+backend/
+Dockerfile
+docker-compose.yml
+render.yaml
+Procfile
+run_judge_demo.bat
+run_judge_demo.sh
+
+# Local Database & Storage
+*.db
+*.sqlite3
+spaceguard.db
+
+# Zip & Packaging Archives
+*.zip
+*.tar.gz
+*.rar
+SPACEGUARD_AI_SIH2026_Submission.zip
+
+# Node Dependencies
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Git & IDE
+.git/
+.github/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
