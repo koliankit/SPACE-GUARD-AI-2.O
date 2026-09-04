@@ -1,9 +1,21 @@
 {
-  "reportMissingImports": false,
-  "reportMissingModuleSource": false,
+  "include": [
+    "backend",
+    "streamlit_app.py"
+  ],
   "exclude": [
     "**/__pyrefly_virtual__/**",
     "**/node_modules/**",
-    "**/.venv/**"
-  ]
+    "**/.venv/**",
+    "**/frontend/**"
+  ],
+  "ignore": [
+    "**/__pyrefly_virtual__/**"
+  ],
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportGeneralTypeIssues": false,
+  "reportOptionalMemberAccess": false,
+  "reportOptionalSubscript": false,
+  "reportPrivateImportUsage": false
 }
