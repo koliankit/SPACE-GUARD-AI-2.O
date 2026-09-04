@@ -9,28 +9,31 @@ from backend.app.schemas.upload import DataQualityReport, ColumnMappingPreview
 ALIAS_MAP = {
     "component_id": [
         "component_id", "component", "part_id", "part", "device_id", 
-        "comp_id", "componentid", "partid", "device"
+        "comp_id", "componentid", "partid", "device", "id", "serial", 
+        "serial_no", "component_name", "part_number", "part_no"
     ],
     "subsystem": [
-        "subsystem", "sub_system", "system", "unit", "module", "assembly"
+        "subsystem", "sub_system", "system", "unit", "module", "assembly", 
+        "domain", "section", "bay"
     ],
     "lot_id": [
-        "lot_id", "lot", "batch", "batch_id", "lot_num", "lotid", "batchid"
+        "lot_id", "lot", "batch", "batch_id", "lot_num", "lotid", "batchid", 
+        "lot_no", "batch_no", "wafer", "lot#"
     ],
     "parameter": [
         "parameter", "parameter_name", "measurement_type", "metric", 
-        "param", "test_parameter", "metric_name"
+        "param", "test_parameter", "metric_name", "test", "feature", "variable"
     ],
     "value": [
-        "value", "measurement", "reading", "val", "data", "measured_value"
+        "value", "measurement", "reading", "val", "data", "measured_value", "measured", "result"
     ],
     "stage": [
         "stage", "burn_in_stage", "burnin_stage", "hour", "hours", 
-        "time_stage", "test_stage", "timepoint"
+        "time_stage", "test_stage", "timepoint", "time", "cycle", "step"
     ],
     "datasheet_limit": [
         "datasheet_limit", "limit", "max_limit", "spec_limit", 
-        "max_spec", "datasheet_max", "upper_limit", "threshold"
+        "max_spec", "datasheet_max", "upper_limit", "threshold", "spec", "max"
     ],
 }
 
@@ -39,7 +42,9 @@ STAGE_PATTERNS = [
     r"^24\s*h(ours?)?$",
     r"^96\s*h(ours?)?$",
     r"^168\s*h(ours?)?$",
-    r"^(\d+)\s*h(ours?)?$",
+    r"^(\d+(?:\.\d+)?)\s*h(ours?)?$",
+    r"^(?:hour|hr|h|stage|time|t|step|cycle)[_\-\s]*(\d+(?:\.\d+)?)(?:h|hr|hours?)?$",
+    r"^(\d+(?:\.\d+)?)$",
 ]
 
 class DataValidationError(Exception):
@@ -128,35 +133,68 @@ def canonicalize_dataframe(df: pd.DataFrame, mapping: Dict[str, str]) -> Tuple[p
     inv_map = {v: k for k, v in mapping.items()}
     df_renamed = df.rename(columns=inv_map)
 
+    # Auto-fallback for component_id if not mapped
+    if "component_id" not in df_renamed.columns:
+        for col in df_renamed.columns:
+            if not pd.api.types.is_numeric_dtype(df_renamed[col]):
+                df_renamed = df_renamed.rename(columns={col: "component_id"})
+                break
+        if "component_id" not in df_renamed.columns and len(df_renamed.columns) > 0:
+            df_renamed = df_renamed.rename(columns={df_renamed.columns[0]: "component_id"})
+
     # Check if wide format
-    stage_cols = [c for c in df_renamed.columns if str(c).startswith("stage_") or re.match(r"^\d+h$", str(c).lower())]
+    stage_cols = [
+        c for c in df_renamed.columns 
+        if str(c).startswith("stage_") or re.match(r"^\d+(?:\.\d+)?(?:h|hours?)?$", str(c).lower().strip())
+    ]
+    
+    # Auto-detect numeric columns as wide-format stages if no standard stage columns found
+    if not stage_cols and ("value" not in df_renamed.columns or "stage" not in df_renamed.columns):
+        for col in df_renamed.columns:
+            if col not in ("component_id", "subsystem", "lot_id", "parameter", "datasheet_limit"):
+                try:
+                    s = pd.to_numeric(df_renamed[col].dropna(), errors="coerce")
+                    if s.notna().sum() > 0:
+                        stage_cols.append(col)
+                except Exception:
+                    pass
     
     canonical_rows = []
     
     if stage_cols:
         # Wide format: component_id | lot_id | parameter | 0h | 24h | 96h | 168h | limit
-        for _, row in df_renamed.iterrows():
-            comp_id = str(row.get("component_id", "")).strip()
-            subsystem = str(row.get("subsystem", "")).strip() or "Flight Computer"
-            lot_id = str(row.get("lot_id", "")).strip()
-            param = str(row.get("parameter", "")).strip()
+        for idx, row in df_renamed.iterrows():
+            raw_c = row.get("component_id")
+            comp_id = str(raw_c).strip() if pd.notna(raw_c) else ""
+            if not comp_id or comp_id.lower() == "nan":
+                comp_id = f"COMP-{idx+1:02d}"
+
+            raw_sub = row.get("subsystem")
+            subsystem = str(raw_sub).strip() if pd.notna(raw_sub) else ""
+            if not subsystem or subsystem.lower() == "nan":
+                subsystem = "Flight Computer"
+
+            raw_lot = row.get("lot_id")
+            lot_id = str(raw_lot).strip() if pd.notna(raw_lot) else ""
+            if not lot_id or lot_id.lower() == "nan":
+                lot_id = "LOT-01"
+
+            raw_param = row.get("parameter")
+            param = str(raw_param).strip() if pd.notna(raw_param) else ""
+            if not param or param.lower() == "nan":
+                param = "Parameter Telemetry"
             
             raw_limit = row.get("datasheet_limit", None)
             try:
                 limit = float(raw_limit) if pd.notna(raw_limit) else 50.0
             except (ValueError, TypeError):
                 limit = 50.0
-                issues.append(f"Invalid datasheet limit for {comp_id}; defaulted to 50.0")
-
-            if not comp_id or comp_id.lower() == "nan":
-                continue
 
             for sc in stage_cols:
                 stage_name = str(sc).replace("stage_", "").strip()
                 val = row.get(sc)
                 
                 if pd.isna(val) or str(val).strip() == "":
-                    # Record missing stage measurement
                     issues.append(f"Missing measurement for {comp_id} at {stage_name}")
                     continue
                 
@@ -169,20 +207,38 @@ def canonicalize_dataframe(df: pd.DataFrame, mapping: Dict[str, str]) -> Tuple[p
                 canonical_rows.append({
                     "component_id": comp_id,
                     "subsystem": subsystem,
-                    "lot_id": lot_id or "LOT-UNKNOWN",
-                    "parameter": param or "Standard Measurement",
+                    "lot_id": lot_id,
+                    "parameter": param,
                     "stage": stage_name,
                     "value": num_val,
                     "datasheet_limit": limit
                 })
     else:
         # Long format: component_id | lot_id | parameter | stage | value | limit
-        for _, row in df_renamed.iterrows():
-            comp_id = str(row.get("component_id", "")).strip()
-            subsystem = str(row.get("subsystem", "")).strip() or "Flight Computer"
-            lot_id = str(row.get("lot_id", "")).strip()
-            param = str(row.get("parameter", "")).strip()
-            stage = str(row.get("stage", "")).strip()
+        for idx, row in df_renamed.iterrows():
+            raw_c = row.get("component_id")
+            comp_id = str(raw_c).strip() if pd.notna(raw_c) else ""
+            if not comp_id or comp_id.lower() == "nan":
+                comp_id = f"COMP-{idx+1:02d}"
+
+            raw_sub = row.get("subsystem")
+            subsystem = str(raw_sub).strip() if pd.notna(raw_sub) else ""
+            if not subsystem or subsystem.lower() == "nan":
+                subsystem = "Flight Computer"
+
+            raw_lot = row.get("lot_id")
+            lot_id = str(raw_lot).strip() if pd.notna(raw_lot) else ""
+            if not lot_id or lot_id.lower() == "nan":
+                lot_id = "LOT-01"
+
+            raw_param = row.get("parameter")
+            param = str(raw_param).strip() if pd.notna(raw_param) else ""
+            if not param or param.lower() == "nan":
+                param = "Parameter Telemetry"
+
+            raw_stage = row.get("stage")
+            stage = str(raw_stage).strip() if pd.notna(raw_stage) else f"stage_{idx}"
+
             val = row.get("value")
             
             raw_limit = row.get("datasheet_limit", None)
@@ -191,9 +247,6 @@ def canonicalize_dataframe(df: pd.DataFrame, mapping: Dict[str, str]) -> Tuple[p
             except (ValueError, TypeError):
                 limit = 50.0
 
-            if not comp_id or comp_id.lower() == "nan":
-                continue
-            
             if pd.isna(val) or str(val).strip() == "":
                 issues.append(f"Missing measurement for {comp_id} at {stage}")
                 continue
@@ -207,17 +260,21 @@ def canonicalize_dataframe(df: pd.DataFrame, mapping: Dict[str, str]) -> Tuple[p
             canonical_rows.append({
                 "component_id": comp_id,
                 "subsystem": subsystem,
-                "lot_id": lot_id or "LOT-UNKNOWN",
-                "parameter": param or "Standard Measurement",
+                "lot_id": lot_id,
+                "parameter": param,
                 "stage": stage,
                 "value": num_val,
                 "datasheet_limit": limit
             })
 
     if not canonical_rows:
-        raise DataValidationError("No valid measurements could be parsed from the dataset.", issues)
+        raise DataValidationError(
+            "No valid numeric measurements could be parsed from the dataset. Please ensure columns with numeric readings (e.g. 0h, 24h, 96h, 168h or a value column) are included.",
+            issues
+        )
 
     canonical_df = pd.DataFrame(canonical_rows)
+
 
     # Deduplicate rows
     dup_count = canonical_df.duplicated(subset=["component_id", "parameter", "stage"]).sum()

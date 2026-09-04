@@ -25,8 +25,9 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 backend/reports/*
 !backend/reports/.gitkeep
-backend/data/*
-!backend/data/.gitkeep
+backend/data/uploads/*
+backend/data/reports/*
+!backend/data/demo/*
 
 # Submissions & Archives
 *.zip
