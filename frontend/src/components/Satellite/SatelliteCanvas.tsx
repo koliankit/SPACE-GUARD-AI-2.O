@@ -10,50 +10,63 @@ import { getComponentSpatialMapping } from '../../config/satelliteMapping';
 interface CameraControllerProps {
   targetPosition: [number, number, number] | null;
   cameraPreset?: string | null;
+  controlsRef: React.RefObject<any>;
 }
 
-const CameraController: React.FC<CameraControllerProps> = ({ targetPosition, cameraPreset }) => {
-  const targetVec = useRef(new THREE.Vector3(0, 0, 0));
-  const cameraTargetVec = useRef(new THREE.Vector3(0, 1.4, 4.2));
+const CameraController: React.FC<CameraControllerProps> = ({ targetPosition, cameraPreset, controlsRef }) => {
+  const isTransitioning = useRef(false);
+  const targetCamPos = useRef(new THREE.Vector3(0, 1.4, 4.2));
+  const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
 
   useEffect(() => {
+    isTransitioning.current = true;
     if (cameraPreset === 'nadir') {
-      targetVec.current.set(0, -0.2, 0.7);
-      cameraTargetVec.current.set(0, -0.2, 2.4);
+      targetLookAt.current.set(0, -0.2, 0.7);
+      targetCamPos.current.set(0, -0.2, 2.4);
     } else if (cameraPreset === 'dish') {
-      targetVec.current.set(0, 1.2, 0);
-      cameraTargetVec.current.set(0, 2.2, 2.6);
+      targetLookAt.current.set(0, 1.2, 0);
+      targetCamPos.current.set(0, 2.0, 2.6);
     } else if (cameraPreset === 'solar') {
-      targetVec.current.set(1.5, 0, 0);
-      cameraTargetVec.current.set(2.8, 1.2, 3.2);
+      targetLookAt.current.set(1.5, 0, 0);
+      targetCamPos.current.set(2.8, 1.0, 3.2);
     } else if (targetPosition) {
-      targetVec.current.set(targetPosition[0], targetPosition[1], targetPosition[2]);
-      cameraTargetVec.current.set(
-        targetPosition[0] * 1.5,
-        targetPosition[1] + 0.8,
-        targetPosition[2] + 2.0
+      targetLookAt.current.set(targetPosition[0], targetPosition[1], targetPosition[2]);
+      targetCamPos.current.set(
+        targetPosition[0] * 1.4,
+        targetPosition[1] + 0.6,
+        targetPosition[2] + 2.2
       );
     } else {
-      targetVec.current.set(0, 0, 0);
-      cameraTargetVec.current.set(0, 1.4, 4.2);
+      targetLookAt.current.set(0, 0, 0);
+      targetCamPos.current.set(0, 1.4, 4.2);
     }
   }, [targetPosition, cameraPreset]);
 
   useFrame(({ camera }) => {
-    camera.position.lerp(cameraTargetVec.current, 0.06);
-    camera.lookAt(targetVec.current);
+    if (!isTransitioning.current) return;
+
+    camera.position.lerp(targetCamPos.current, 0.08);
+    if (controlsRef.current) {
+      controlsRef.current.target.lerp(targetLookAt.current, 0.08);
+      controlsRef.current.update();
+    }
+
+    // Stop transitioning once close enough to give full smooth manual control back to user
+    if (camera.position.distanceTo(targetCamPos.current) < 0.03) {
+      isTransitioning.current = false;
+    }
   });
 
   return null;
 };
 
-// Realistic Curved Earth Horizon with Atmospheric Limb Scattering
+// Optimized Curved Earth Horizon with Atmospheric Limb Scattering (Smooth 60FPS)
 const EarthHorizon: React.FC = () => {
   return (
     <group position={[0, -22.5, -6]}>
       {/* Earth Surface Sphere */}
-      <mesh receiveShadow>
-        <sphereGeometry args={[20, 64, 64]} />
+      <mesh>
+        <sphereGeometry args={[20, 36, 36]} />
         <meshStandardMaterial
           color="#062846"
           roughness={0.7}
@@ -62,7 +75,7 @@ const EarthHorizon: React.FC = () => {
       </mesh>
       {/* Atmospheric Scattering Glow Shell */}
       <mesh>
-        <sphereGeometry args={[20.3, 64, 64]} />
+        <sphereGeometry args={[20.25, 36, 36]} />
         <meshBasicMaterial
           color="#00E5FF"
           transparent
@@ -72,11 +85,11 @@ const EarthHorizon: React.FC = () => {
       </mesh>
       {/* Cloud layer */}
       <mesh>
-        <sphereGeometry args={[20.1, 48, 48]} />
+        <sphereGeometry args={[20.08, 32, 32]} />
         <meshStandardMaterial
           color="#E2E8F0"
           transparent
-          opacity={0.25}
+          opacity={0.22}
           roughness={0.9}
         />
       </mesh>
@@ -106,6 +119,7 @@ export const SatelliteCanvas: React.FC<SatelliteCanvasProps> = ({
   const handleResetCamera = () => {
     setCameraPreset(null);
     if (controlsRef.current) {
+      controlsRef.current.target.set(0, 0, 0);
       controlsRef.current.reset();
     }
   };
@@ -115,33 +129,30 @@ export const SatelliteCanvas: React.FC<SatelliteCanvasProps> = ({
       {/* 3D R3F Canvas */}
       <Canvas
         camera={{ position: [0, 1.4, 4.2], fov: 42 }}
-        gl={{ antialias: true, alpha: false }}
-        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+        dpr={[1, 1.5]}
       >
         <color attach="background" args={['#030712']} />
 
         {/* Realistic Space Lighting */}
-        <ambientLight intensity={0.25} />
+        <ambientLight intensity={0.4} />
         {/* Direct Solar Radiation (Key Sun Light) */}
         <directionalLight
           position={[10, 12, 8]}
-          intensity={2.0}
+          intensity={2.2}
           color="#FFFDF7"
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
         />
         {/* Earth Albedo Bounce Light (Cyan/Blue Reflection from below) */}
         <directionalLight
           position={[0, -6, -2]}
-          intensity={0.8}
+          intensity={0.9}
           color="#0284C7"
         />
         {/* Rim Backlight */}
-        <pointLight position={[-6, 4, -8]} intensity={0.6} color="#00E5FF" />
+        <pointLight position={[-6, 4, -8]} intensity={0.8} color="#00E5FF" />
 
         {/* Deep Space Background Stars */}
-        <Stars radius={120} depth={60} count={4000} factor={4} saturation={0} fade speed={0.8} />
+        <Stars radius={100} depth={50} count={2500} factor={3} saturation={0} fade speed={0.5} />
 
         {/* Earth Horizon Below */}
         <EarthHorizon />
@@ -158,16 +169,19 @@ export const SatelliteCanvas: React.FC<SatelliteCanvasProps> = ({
         <CameraController
           targetPosition={focusedMapping?.position || null}
           cameraPreset={cameraPreset}
+          controlsRef={controlsRef}
         />
 
-        {/* Orbit Controls */}
+        {/* Orbit Controls (Buttery Smooth Damping) */}
         <OrbitControls
           ref={controlsRef}
           enablePan={true}
           enableZoom={true}
-          minDistance={1.6}
-          maxDistance={11}
-          dampingFactor={0.06}
+          enableDamping={true}
+          dampingFactor={0.08}
+          rotateSpeed={0.85}
+          minDistance={1.4}
+          maxDistance={10}
         />
       </Canvas>
 

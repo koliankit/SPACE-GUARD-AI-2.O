@@ -144,20 +144,148 @@ export const SATELLITE_COMPONENTS: Record<string, ComponentSpatialConfig> = {
   "COMP-PAY-01": {
     subsystem: "Payload",
     physicalModelId: "payloadSensor",
-    position: [0.0, 0.0, 1.1],
+    position: [0.0, -0.2, 0.9],
     description: "Optical Earth Observation Imaging Sensor"
+  },
+  "COMP-PAY-02": {
+    subsystem: "Payload",
+    physicalModelId: "payloadSensor",
+    position: [0.0, -0.2, 0.9],
+    description: "Thermal Infrared Radiometer Sensor"
+  },
+
+  // Reaction Wheel Assembly (AOCS Internal Deck)
+  "COMP-RW-01": {
+    subsystem: "Attitude Control (RW)",
+    physicalModelId: "reactionWheels",
+    position: [0.0, 0.0, 0.0],
+    description: "3-Axis Reaction Wheel Momentum Assembly"
+  },
+
+  // Solar Array Subsystems
+  "COMP-SOL-01": {
+    subsystem: "Solar Array Port",
+    physicalModelId: "solarArrayPort",
+    position: [-1.6, 0.0, 0.0],
+    description: "Port Photovoltaic Solar Array Wing"
+  },
+  "COMP-SOL-02": {
+    subsystem: "Solar Array Starboard",
+    physicalModelId: "solarArrayStbd",
+    position: [1.6, 0.0, 0.0],
+    description: "Starboard Photovoltaic Solar Array Wing"
   },
 };
 
 export const getComponentSpatialMapping = (componentId: string): ComponentSpatialConfig => {
+  if (!componentId) {
+    return {
+      subsystem: "Primary Bus Core",
+      physicalModelId: "satelliteBus",
+      position: [0, 0, 0],
+      description: "Primary Spacecraft Bus Structure"
+    };
+  }
+
+  // Exact match
   if (SATELLITE_COMPONENTS[componentId]) {
     return SATELLITE_COMPONENTS[componentId];
   }
-  // Default fallback to center of satellite bus
+
+  const upper = componentId.toUpperCase();
+
+  // Prefix & Subsystem fuzzy matcher
+  if (upper.includes('FC') || upper.includes('CPU') || upper.includes('OBC') || upper.includes('PROC') || upper.includes('MCU')) {
+    return {
+      subsystem: "Flight Computer / OBC",
+      physicalModelId: "flightComputer",
+      position: [0.0, 0.25, 0.72],
+      description: `Flight Avionics Module [${componentId}]`
+    };
+  }
+  if (upper.includes('PWR') || upper.includes('EPS') || upper.includes('REG') || upper.includes('VOLT') || upper.includes('DIST')) {
+    return {
+      subsystem: "Power Conditioning (EPS)",
+      physicalModelId: "powerDistribution",
+      position: [0.72, -0.2, 0.0],
+      description: `Power Management Unit [${componentId}]`
+    };
+  }
+  if (upper.includes('BAT') || upper.includes('CELL') || upper.includes('ENERGY') || upper.includes('STOR')) {
+    return {
+      subsystem: "Battery Energy Storage",
+      physicalModelId: "batteryModule",
+      position: [-0.72, -0.2, 0.0],
+      description: `Li-Ion Storage Bank [${componentId}]`
+    };
+  }
+  if (upper.includes('COM') || upper.includes('RF') || upper.includes('TX') || upper.includes('RX') || upper.includes('DISH') || upper.includes('HGA')) {
+    return {
+      subsystem: "RF Communications (HGA)",
+      physicalModelId: "rfTransceiver",
+      position: [0.0, 1.35, 0.0],
+      description: `High Gain Antenna Assembly [${componentId}]`
+    };
+  }
+  if (upper.includes('NAV') || upper.includes('AOCS') || upper.includes('GYRO') || upper.includes('STAR') || upper.includes('IMU')) {
+    return {
+      subsystem: "Navigation & Star Trackers",
+      physicalModelId: "navigationIMU",
+      position: [0.52, 0.75, -0.45],
+      description: `Attitude Optical Tracker [${componentId}]`
+    };
+  }
+  if (upper.includes('TEL') || upper.includes('TLM') || upper.includes('SENS') || upper.includes('ANT')) {
+    return {
+      subsystem: "Telemetry & Instrumentation",
+      physicalModelId: "telemetryUnit",
+      position: [-0.52, 0.75, -0.45],
+      description: `Telemetry Multiplexer [${componentId}]`
+    };
+  }
+  if (upper.includes('THM') || upper.includes('THERM') || upper.includes('HEAT') || upper.includes('PROP') || upper.includes('LAM')) {
+    return {
+      subsystem: "Thermal & LAM Propulsion",
+      physicalModelId: "thermalController",
+      position: [0.0, -0.85, 0.0],
+      description: `Thermal Control & Propulsion [${componentId}]`
+    };
+  }
+  if (upper.includes('PAY') || upper.includes('CAM') || upper.includes('OPT') || upper.includes('IMG') || upper.includes('RAD')) {
+    return {
+      subsystem: "Earth Observation Payload",
+      physicalModelId: "payloadSensor",
+      position: [0.0, -0.2, 0.9],
+      description: `Optical Imaging Payload [${componentId}]`
+    };
+  }
+  if (upper.includes('SOL') || upper.includes('WING') || upper.includes('PANEL')) {
+    return {
+      subsystem: "Solar Array Wing",
+      physicalModelId: "solarArrayPort",
+      position: [-1.6, 0.0, 0.0],
+      description: `Photovoltaic Wing [${componentId}]`
+    };
+  }
+
+  // Consistent hash placement across known key physical points on the spacecraft
+  const positions: [number, number, number][] = [
+    [0.0, 0.25, 0.72],   // Avionics front
+    [0.72, -0.2, 0.0],   // Starboard power
+    [-0.72, -0.2, 0.0],  // Port battery
+    [0.0, 1.35, 0.0],    // Zenith dish
+    [0.52, 0.75, -0.45], // Star tracker
+    [-0.52, 0.75, -0.45],// Telemetry mast
+    [0.0, -0.85, 0.0],   // Base thruster
+    [0.0, -0.2, 0.9],    // Nadir camera
+  ];
+  const hash = componentId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const pos = positions[hash % positions.length];
+
   return {
-    subsystem: "General Subsystem",
+    subsystem: `Subsystem [${componentId.slice(0, 8)}]`,
     physicalModelId: "satelliteBus",
-    position: [0, 0, 0],
-    description: `Component ${componentId}`
+    position: pos,
+    description: `Spacecraft Subsystem Component: ${componentId}`
   };
 };
