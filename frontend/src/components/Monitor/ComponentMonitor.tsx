@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, AlertOctagon, AlertTriangle, CheckCircle2, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, AlertOctagon, AlertTriangle, CheckCircle2, SlidersHorizontal, Crosshair, Radio } from 'lucide-react';
 import { ComponentSummary, DecisionType } from '../../types';
 
 interface ComponentMonitorProps {
@@ -58,14 +58,14 @@ export const ComponentMonitor: React.FC<ComponentMonitorProps> = ({
     switch (decision) {
       case 'REJECT':
         return (
-          <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse">
+          <span className="inline-flex items-center space-x-1 px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-[#FF0055]/20 text-[#FF0055] border border-[#FF0055]/50 animate-pulse glow-reject">
             <AlertOctagon className="w-2.5 h-2.5" />
             <span>REJECT</span>
           </span>
         );
       case 'MONITOR':
         return (
-          <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/40">
+          <span className="inline-flex items-center space-x-1 px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-[#FFB800]/20 text-[#FFB800] border border-[#FFB800]/50 glow-monitor">
             <AlertTriangle className="w-2.5 h-2.5" />
             <span>MONITOR</span>
           </span>
@@ -73,7 +73,7 @@ export const ComponentMonitor: React.FC<ComponentMonitorProps> = ({
       case 'SAFE':
       default:
         return (
-          <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+          <span className="inline-flex items-center space-x-1 px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-[#00FF9D]/10 text-[#00FF9D] border border-[#00FF9D]/30">
             <CheckCircle2 className="w-2.5 h-2.5" />
             <span>SAFE</span>
           </span>
@@ -82,21 +82,24 @@ export const ComponentMonitor: React.FC<ComponentMonitorProps> = ({
   };
 
   const getRiskColor = (risk: number) => {
-    if (risk >= 70) return 'text-rose-400';
-    if (risk >= 35) return 'text-amber-400';
-    return 'text-emerald-400';
+    if (risk >= 70) return 'text-[#FF0055]';
+    if (risk >= 35) return 'text-[#FFB800]';
+    return 'text-[#00FF9D]';
   };
 
   return (
-    <div className="flex flex-col h-full bg-space-900 border-r border-slate-800 select-none">
+    <div className="flex flex-col h-full bg-[#060D1A] border-r border-[#1E3A6E] select-none font-mono text-xs">
       {/* Panel Header */}
-      <div className="p-3 border-b border-slate-800">
+      <div className="p-3 border-b border-[#1E3A6E] bg-[#030712]">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-mono font-bold tracking-wider text-slate-200 uppercase">
-            Component Monitor
-          </span>
-          <span className="text-[11px] font-mono text-slate-400">
-            {filteredComponents.length} / {components.length}
+          <div className="flex items-center space-x-1.5">
+            <Crosshair className="w-3.5 h-3.5 text-[#00E5FF] animate-pulse" />
+            <span className="text-xs font-orbitron font-bold tracking-wider text-white uppercase">
+              SUBSYSTEM TELEMETRY
+            </span>
+          </div>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#101F3C] text-[#00E5FF] border border-[#1E3A6E]">
+            {filteredComponents.length} / {components.length} UNITS
           </span>
         </div>
 
@@ -105,69 +108,69 @@ export const ComponentMonitor: React.FC<ComponentMonitorProps> = ({
           <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search ID, Lot, Subsystem..."
+            placeholder="SCAN ID, LOT, SUBSYSTEM..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 bg-space-950 border border-slate-800 rounded text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyber-cyan font-mono"
+            className="w-full pl-8 pr-3 py-1.5 bg-[#0A1120] border border-[#1E3A6E] rounded text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#00E5FF] font-mono tracking-wider"
           />
         </div>
 
-        {/* Filter Pills */}
-        <div className="grid grid-cols-4 gap-1 text-[11px] font-mono">
+        {/* Tactical Filter Pills */}
+        <div className="grid grid-cols-4 gap-1 text-[10px] font-mono font-bold">
           <button
             onClick={() => setActiveFilter('ALL')}
-            className={`py-1 rounded text-center transition ${
+            className={`py-1 rounded text-center transition cursor-pointer ${
               activeFilter === 'ALL'
-                ? 'bg-space-700 text-white font-bold border border-slate-600'
-                : 'bg-space-950 text-slate-400 hover:text-slate-200'
+                ? 'bg-[#1E3A6E] text-white border border-[#00E5FF]/60 shadow-[0_0_10px_rgba(0,229,255,0.2)]'
+                : 'bg-[#0A1120] text-slate-400 hover:text-white border border-[#162A50]'
             }`}
           >
             ALL ({counts.all})
           </button>
           <button
             onClick={() => setActiveFilter('SAFE')}
-            className={`py-1 rounded text-center transition ${
+            className={`py-1 rounded text-center transition cursor-pointer ${
               activeFilter === 'SAFE'
-                ? 'bg-emerald-950/60 text-emerald-400 font-bold border border-emerald-500/50'
-                : 'bg-space-950 text-slate-400 hover:text-emerald-400'
+                ? 'bg-[#00FF9D]/20 text-[#00FF9D] border border-[#00FF9D]'
+                : 'bg-[#0A1120] text-slate-400 hover:text-[#00FF9D] border border-[#162A50]'
             }`}
           >
             SAFE ({counts.safe})
           </button>
           <button
             onClick={() => setActiveFilter('MONITOR')}
-            className={`py-1 rounded text-center transition ${
+            className={`py-1 rounded text-center transition cursor-pointer ${
               activeFilter === 'MONITOR'
-                ? 'bg-amber-950/60 text-amber-400 font-bold border border-amber-500/50'
-                : 'bg-space-950 text-slate-400 hover:text-amber-400'
+                ? 'bg-[#FFB800]/20 text-[#FFB800] border border-[#FFB800]'
+                : 'bg-[#0A1120] text-slate-400 hover:text-[#FFB800] border border-[#162A50]'
             }`}
           >
-            MON ({counts.monitor})
+            WARN ({counts.monitor})
           </button>
           <button
             onClick={() => setActiveFilter('REJECT')}
-            className={`py-1 rounded text-center transition ${
+            className={`py-1 rounded text-center transition cursor-pointer ${
               activeFilter === 'REJECT'
-                ? 'bg-rose-950/60 text-rose-400 font-bold border border-rose-500/50'
-                : 'bg-space-950 text-slate-400 hover:text-rose-400'
+                ? 'bg-[#FF0055]/20 text-[#FF0055] border border-[#FF0055] animate-pulse'
+                : 'bg-[#0A1120] text-slate-400 hover:text-[#FF0055] border border-[#162A50]'
             }`}
           >
-            REJ ({counts.reject})
+            FAIL ({counts.reject})
           </button>
         </div>
 
-        {/* Subsystem Dropdown */}
+        {/* Subsystem Selector */}
         {subsystems.length > 2 && (
-          <div className="mt-2 flex items-center space-x-1.5 text-xs text-slate-400 font-mono">
-            <SlidersHorizontal className="w-3 h-3 text-slate-500" />
+          <div className="mt-2 flex items-center space-x-1 text-xs text-slate-400">
+            <SlidersHorizontal className="w-3 h-3 text-[#00E5FF]" />
             <select
               value={subsystemFilter}
               onChange={(e) => setSubsystemFilter(e.target.value)}
-              className="bg-space-950 border border-slate-800 rounded px-2 py-1 text-[11px] text-slate-300 focus:outline-none focus:border-cyber-cyan w-full"
+              className="bg-[#0A1120] border border-[#1E3A6E] rounded px-2 py-1 text-[10px] font-mono text-slate-300 focus:outline-none focus:border-[#00E5FF] w-full"
             >
               {subsystems.map((sub) => (
                 <option key={sub} value={sub}>
-                  {sub === 'ALL' ? 'All Subsystems' : sub}
+                  {sub === 'ALL' ? 'ALL FLIGHT SUBSYSTEMS' : sub.toUpperCase()}
                 </option>
               ))}
             </select>
@@ -175,60 +178,64 @@ export const ComponentMonitor: React.FC<ComponentMonitorProps> = ({
         )}
       </div>
 
-      {/* Component List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60">
+      {/* Component Telemetry Stream Rows */}
+      <div className="flex-1 overflow-y-auto divide-y divide-[#162A50]/60">
         {isLoading ? (
           <div className="p-8 text-center text-xs font-mono text-slate-500 animate-pulse">
-            Querying component reliability records...
+            SCANNING TELEMETRY TELEMETRY BUS...
           </div>
         ) : filteredComponents.length === 0 ? (
           <div className="p-8 text-center text-xs font-mono text-slate-500">
-            No components match active criteria.
+            NO SUBSYSTEMS FOUND.
           </div>
         ) : (
-          filteredComponents.map((comp) => {
+          filteredComponents.map((comp, idx) => {
             const isSelected = selectedComponentId === comp.component_id;
+            const hexAddr = '0x' + (1000 + idx * 47).toString(16).toUpperCase();
             return (
               <div
                 key={comp.component_id}
                 onClick={() => onSelectComponent(comp.component_id)}
-                className={`p-2.5 transition cursor-pointer flex flex-col space-y-1 hover:bg-space-850 ${
+                className={`p-2.5 transition cursor-pointer flex flex-col space-y-1 hover:bg-[#0B1528] ${
                   isSelected
-                    ? 'bg-space-800/90 border-l-4 border-cyber-cyan shadow-inner'
+                    ? 'bg-[#101F3C] border-l-4 border-[#00E5FF] shadow-[inset_0_0_12px_rgba(0,229,255,0.15)]'
                     : 'border-l-4 border-transparent'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-white tracking-tight">
-                    {comp.component_id}
-                  </span>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-[10px] text-slate-500 font-mono">[{hexAddr}]</span>
+                    <span className="font-mono text-xs font-bold text-white tracking-wide">
+                      {comp.component_id}
+                    </span>
+                  </div>
                   {getDecisionBadge(comp.decision)}
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                  <span className="truncate max-w-[130px]">{comp.subsystem}</span>
-                  <span>{comp.lot_id}</span>
+                <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                  <span className="truncate max-w-[140px] text-slate-300">{comp.subsystem}</span>
+                  <span className="text-[#00E5FF]">{comp.lot_id}</span>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] font-mono pt-0.5">
-                  <span className="text-slate-500 text-[10px]">
-                    Risk Score:
+                <div className="flex items-center justify-between text-[10px] font-mono pt-0.5">
+                  <span className="text-slate-500">
+                    DEGRADATION RISK:
                   </span>
                   <div className="flex items-center space-x-1.5">
-                    <div className="w-12 bg-space-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                    <div className="w-14 bg-[#030712] h-1.5 rounded-full overflow-hidden border border-[#1E3A6E]">
                       <div
                         className={`h-full ${
                           comp.risk_score >= 70
-                            ? 'bg-rose-500'
+                            ? 'bg-[#FF0055]'
                             : comp.risk_score >= 35
-                            ? 'bg-amber-500'
-                            : 'bg-emerald-500'
+                            ? 'bg-[#FFB800]'
+                            : 'bg-[#00FF9D]'
                         }`}
-                        style={{ width: `${Math.min(100, Math.max(5, comp.risk_score))}%` }}
+                        style={{ width: `${Math.min(100, Math.max(6, comp.risk_score))}%` }}
                       />
                     </div>
-                    <span className={`font-bold ${getRiskColor(comp.risk_score)}`}>
-                      {comp.risk_score.toFixed(0)}
+                    <span className={`font-bold font-mono ${getRiskColor(comp.risk_score)}`}>
+                      {comp.risk_score.toFixed(0)}%
                     </span>
                   </div>
                 </div>

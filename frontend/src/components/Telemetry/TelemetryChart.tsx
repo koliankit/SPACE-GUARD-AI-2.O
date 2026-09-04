@@ -53,9 +53,9 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({
         y: yObserved,
         type: 'scatter',
         mode: 'lines+markers',
-        name: `${componentDetail?.component_id || 'Component'} Observed`,
-        line: { color: componentResult?.decision === 'REJECT' ? '#EF4444' : '#38BDF8', width: 2.5 },
-        marker: { size: 7, color: componentResult?.decision === 'REJECT' ? '#EF4444' : '#38BDF8' },
+        name: `${componentDetail?.component_id || 'COMP'} SENSOR RAW`,
+        line: { color: componentResult?.decision === 'REJECT' ? '#FF0055' : '#00E5FF', width: 2.5 },
+        marker: { size: 7, color: componentResult?.decision === 'REJECT' ? '#FF0055' : '#00E5FF', symbol: 'circle' },
       },
       // 2. Extrapolated Future Drift Trajectory
       {
@@ -63,9 +63,9 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({
         y: yPred,
         type: 'scatter',
         mode: 'lines+markers',
-        name: 'AI Projected Drift (250h)',
-        line: { color: '#F59E0B', width: 2, dash: 'dot' },
-        marker: { size: 6, symbol: 'diamond', color: '#F59E0B' },
+        name: 'AI KALMAN/DRIFT (250h)',
+        line: { color: '#FFB800', width: 2, dash: 'dot' },
+        marker: { size: 6, symbol: 'diamond', color: '#FFB800' },
       },
       // 3. Lot Baseline Mean
       {
@@ -73,8 +73,8 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({
         y: [lotMean, lotMean],
         type: 'scatter',
         mode: 'lines',
-        name: 'Lot Peer Baseline Mean',
-        line: { color: '#94A3B8', width: 1.5, dash: 'dash' },
+        name: 'LOT POPULATION MEAN',
+        line: { color: '#64748B', width: 1.5, dash: 'dash' },
       },
       // 4. Datasheet Upper Limit
       {
@@ -82,18 +82,18 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({
         y: [limit, limit],
         type: 'scatter',
         mode: 'lines',
-        name: `Datasheet Spec Limit (${limit.toFixed(1)})`,
-        line: { color: '#DC2626', width: 2, dash: 'dashdot' },
+        name: `ISRO SPEC THRESHOLD (${limit.toFixed(1)})`,
+        line: { color: '#FF0055', width: 2, dash: 'dashdot' },
       },
     ];
 
     const layout: Partial<Plotly.Layout> = {
       autosize: true,
-      height: 180,
-      margin: { l: 45, r: 25, t: 25, b: 35 },
+      height: 195,
+      margin: { l: 48, r: 20, t: 28, b: 35 },
       paper_bgcolor: 'transparent',
-      plot_bgcolor: 'transparent',
-      font: { family: 'monospace', size: 10, color: '#94A3B8' },
+      plot_bgcolor: 'rgba(3, 7, 18, 0.6)',
+      font: { family: "'Share Tech Mono', 'JetBrains Mono', monospace", size: 10, color: '#94A3B8' },
       showlegend: true,
       legend: {
         orientation: 'h',
@@ -102,18 +102,18 @@ export const TelemetryChart: React.FC<TelemetryChartProps> = ({
         font: { size: 9, color: '#CBD5E1' },
       },
       xaxis: {
-        title: 'Burn-In Hours (h)',
+        title: 'STAGE SEQUENCE (HOURS: 0h → 250h)',
         color: '#64748B',
-        gridcolor: 'rgba(51, 65, 85, 0.3)',
-        zerolinecolor: '#334155',
+        gridcolor: 'rgba(30, 41, 59, 0.6)',
+        zerolinecolor: '#1E293B',
         tickvals: [0, 24, 96, 168, 250],
         range: [-5, 260],
       },
       yaxis: {
-        title: param,
+        title: `${param} [VALUE]`,
         color: '#64748B',
-        gridcolor: 'rgba(51, 65, 85, 0.3)',
-        zerolinecolor: '#334155',
+        gridcolor: 'rgba(30, 41, 59, 0.6)',
+        zerolinecolor: '#1E293B',
       },
       hovermode: 'closest',
     };

@@ -78,14 +78,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-space-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 font-share">
+      <div className="bg-[#040914] border border-[#00E5FF]/40 rounded-lg shadow-[0_0_50px_rgba(0,229,255,0.2)] w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh] corner-box relative">
         {/* Modal Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-space-950">
+        <div className="p-4 border-b border-[#1E293B] flex items-center justify-between bg-[#030712]">
           <div className="flex items-center space-x-2">
-            <Upload className="w-4 h-4 text-cyber-cyan" />
-            <h3 className="text-sm font-mono font-bold text-white tracking-wide">
-              UPLOAD BURN-IN & SCREENING DATASET
+            <Upload className="w-4 h-4 text-[#00E5FF]" />
+            <h3 className="text-sm font-mono font-bold text-white tracking-widest">
+              ISRO SDSC-SHAR // BURN-IN & TELEMETRY INGESTION GATEWAY
             </h3>
           </div>
           <button
@@ -97,7 +97,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 space-y-4 flex-1 overflow-y-auto">
+        <div className="p-5 space-y-4 flex-1 overflow-y-auto bg-[#040812]">
           {!uploadResult ? (
             <>
               {/* Drag & Drop Zone */}
@@ -109,8 +109,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 onClick={() => inputRef.current?.click()}
                 className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer transition ${
                   dragActive
-                    ? 'border-cyber-cyan bg-cyber-blue/10'
-                    : 'border-slate-700 hover:border-slate-500 bg-space-950/60'
+                    ? 'border-[#00E5FF] bg-[#00E5FF]/10'
+                    : 'border-[#1E293B] hover:border-[#00E5FF]/60 bg-[#030712]'
                 }`}
               >
                 <input

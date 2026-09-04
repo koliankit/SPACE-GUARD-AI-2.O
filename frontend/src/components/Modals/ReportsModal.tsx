@@ -59,14 +59,14 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-space-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 font-share">
+      <div className="bg-[#040914] border border-[#00E5FF]/40 rounded-lg shadow-[0_0_50px_rgba(0,229,255,0.2)] w-full max-w-2xl overflow-hidden flex flex-col max-h-[85vh] corner-box relative">
         {/* Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-space-950">
+        <div className="p-4 border-b border-[#1E293B] flex items-center justify-between bg-[#030712]">
           <div className="flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-cyber-cyan" />
-            <h3 className="text-sm font-mono font-bold text-white tracking-wide">
-              AEROSPACE RELIABILITY SCREENING REPORTS
+            <FileText className="w-4 h-4 text-[#00E5FF]" />
+            <h3 className="text-sm font-mono font-bold text-white tracking-widest">
+              ISRO SDSC-SHAR // SPACE-GRADE FLIGHT QUALIFICATION CERTIFICATES
             </h3>
           </div>
           <button
@@ -78,25 +78,25 @@ export const ReportsModal: React.FC<ReportsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4 flex-1 overflow-y-auto">
+        <div className="p-5 space-y-4 flex-1 overflow-y-auto bg-[#040812]">
           {/* Action Bar */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-space-950 border border-slate-800">
+          <div className="flex items-center justify-between p-3.5 rounded-lg bg-[#030712] border border-[#1E293B]">
             <div>
-              <span className="text-xs font-mono font-bold text-white block">
-                OFFICIAL REPORT GENERATION
+              <span className="text-xs font-mono font-bold text-white block tracking-wider">
+                OFFICIAL ISRO MISSION FLIGHT CLEARANCE REPORT
               </span>
               <span className="text-[11px] text-slate-400 font-mono">
-                Produces official aerospace PDF report with component matrices, lot z-scores, and AI diagnosis.
+                Generates high-resolution PDF with component risk matrices, lot z-scores, and flight clearance stamps.
               </span>
             </div>
 
             <button
               onClick={handleGenerateReport}
               disabled={isGenerating || !activeAnalysisId}
-              className="px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-600 to-cyber-blue hover:from-blue-500 hover:to-cyan-500 text-white font-mono text-xs font-bold transition flex items-center space-x-1.5 shadow-md disabled:opacity-50 cursor-pointer"
+              className="px-3.5 py-1.5 rounded bg-gradient-to-r from-[#00E5FF] to-[#0099FF] hover:opacity-90 text-black font-mono text-xs font-bold transition flex items-center space-x-1.5 shadow-[0_0_15px_rgba(0,229,255,0.3)] disabled:opacity-50 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>{isGenerating ? 'GENERATING PDF...' : 'GENERATE PDF REPORT'}</span>
+              <span>{isGenerating ? 'GENERATING CERTIFICATE...' : 'GENERATE PDF'}</span>
             </button>
           </div>
 

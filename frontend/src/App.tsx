@@ -240,7 +240,10 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-space-950 text-slate-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-screen w-screen bg-[#030712] text-slate-100 overflow-hidden font-rajdhani select-none relative isro-grid">
+      {/* CRT Scanline Tactical Overlay */}
+      <div className="hud-scanline pointer-events-none" />
+
       {/* Top Mission Header */}
       <Header
         missionStatus={missionStatus}
@@ -253,9 +256,9 @@ export const App: React.FC = () => {
       />
 
       {/* Main Workspace (Left 25% | Center 50% | Right 25%) */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative z-10">
         {/* LEFT PANEL: Component Monitor (25%) */}
-        <div className="w-1/4 min-w-[280px] max-w-sm h-full flex flex-col">
+        <div className="w-1/4 min-w-[290px] max-w-sm h-full flex flex-col border-r border-[#1E293B]">
           <ComponentMonitor
             components={components}
             selectedComponentId={selectedComponentId}
@@ -264,9 +267,9 @@ export const App: React.FC = () => {
         </div>
 
         {/* CENTER & BOTTOM COLUMN (50% Center, plus collapsible bottom) */}
-        <div className="flex-1 flex flex-col h-full border-x border-slate-800">
+        <div className="flex-1 flex flex-col h-full overflow-hidden">
           {/* CENTER: 3D Satellite Canvas */}
-          <div className="flex-1 relative overflow-hidden bg-space-950">
+          <div className="flex-1 relative overflow-hidden bg-[#030712]">
             <SatelliteCanvas
               selectedComponentId={selectedComponentId}
               componentResults={resultsMap}
@@ -276,26 +279,26 @@ export const App: React.FC = () => {
 
           {/* BOTTOM PANEL (Collapsible with 4 tabs) */}
           <div
-            className={`border-t border-slate-800 bg-space-900 transition-all duration-300 flex flex-col ${
-              isBottomCollapsed ? 'h-9' : 'h-60'
+            className={`border-t border-[#1E293B] bg-[#070D18] transition-all duration-300 flex flex-col relative z-20 ${
+              isBottomCollapsed ? 'h-9' : 'h-64'
             }`}
           >
             {/* Bottom Tab Bar */}
-            <div className="h-9 bg-space-950 px-3 flex items-center justify-between border-b border-slate-800 select-none shrink-0">
-              <div className="flex items-center space-x-2 text-xs font-mono">
+            <div className="h-9 bg-[#040812] px-3 flex items-center justify-between border-b border-[#1E293B] select-none shrink-0 font-mono">
+              <div className="flex items-center space-x-1.5 text-xs">
                 <button
                   onClick={() => {
                     setBottomTab('telemetry');
                     setIsBottomCollapsed(false);
                   }}
-                  className={`px-2.5 py-1 rounded transition flex items-center space-x-1.5 ${
+                  className={`px-3 py-1 rounded text-[11px] tracking-wider transition flex items-center space-x-1.5 ${
                     bottomTab === 'telemetry' && !isBottomCollapsed
-                      ? 'bg-space-800 text-cyber-cyan border border-slate-700 font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/50 font-bold shadow-[0_0_10px_rgba(0,229,255,0.2)]'
+                      : 'text-slate-400 hover:text-slate-200 border border-transparent'
                   }`}
                 >
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span>BURN-IN TELEMETRY</span>
+                  <BarChart3 className="w-3.5 h-3.5 text-[#00E5FF]" />
+                  <span>[01] BURN-IN TELEMETRY</span>
                 </button>
 
                 <button
@@ -303,14 +306,14 @@ export const App: React.FC = () => {
                     setBottomTab('timeline');
                     setIsBottomCollapsed(false);
                   }}
-                  className={`px-2.5 py-1 rounded transition flex items-center space-x-1.5 ${
+                  className={`px-3 py-1 rounded text-[11px] tracking-wider transition flex items-center space-x-1.5 ${
                     bottomTab === 'timeline' && !isBottomCollapsed
-                      ? 'bg-space-800 text-cyber-cyan border border-slate-700 font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/50 font-bold shadow-[0_0_10px_rgba(0,229,255,0.2)]'
+                      : 'text-slate-400 hover:text-slate-200 border border-transparent'
                   }`}
                 >
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>STAGE TIMELINE</span>
+                  <Clock className="w-3.5 h-3.5 text-[#00E5FF]" />
+                  <span>[02] STAGE TIMELINE</span>
                 </button>
 
                 <button
@@ -318,14 +321,14 @@ export const App: React.FC = () => {
                     setBottomTab('map');
                     setIsBottomCollapsed(false);
                   }}
-                  className={`px-2.5 py-1 rounded transition flex items-center space-x-1.5 ${
+                  className={`px-3 py-1 rounded text-[11px] tracking-wider transition flex items-center space-x-1.5 ${
                     bottomTab === 'map' && !isBottomCollapsed
-                      ? 'bg-space-800 text-cyber-cyan border border-slate-700 font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/50 font-bold shadow-[0_0_10px_rgba(0,229,255,0.2)]'
+                      : 'text-slate-400 hover:text-slate-200 border border-transparent'
                   }`}
                 >
-                  <Radio className="w-3.5 h-3.5" />
-                  <span>MISSION LINK</span>
+                  <Radio className="w-3.5 h-3.5 text-[#00E5FF]" />
+                  <span>[03] ISTRAC GROUND LINK</span>
                 </button>
 
                 <button
@@ -333,30 +336,35 @@ export const App: React.FC = () => {
                     setBottomTab('audit');
                     setIsBottomCollapsed(false);
                   }}
-                  className={`px-2.5 py-1 rounded transition flex items-center space-x-1.5 ${
+                  className={`px-3 py-1 rounded text-[11px] tracking-wider transition flex items-center space-x-1.5 ${
                     bottomTab === 'audit' && !isBottomCollapsed
-                      ? 'bg-space-800 text-cyber-cyan border border-slate-700 font-bold'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-[#00E5FF]/15 text-[#00E5FF] border border-[#00E5FF]/50 font-bold shadow-[0_0_10px_rgba(0,229,255,0.2)]'
+                      : 'text-slate-400 hover:text-slate-200 border border-transparent'
                   }`}
                 >
-                  <History className="w-3.5 h-3.5" />
-                  <span>AUDIT TRAIL ({auditLogs.length})</span>
+                  <History className="w-3.5 h-3.5 text-[#00E5FF]" />
+                  <span>[04] CYBER AUDIT TRAIL ({auditLogs.length})</span>
                 </button>
               </div>
 
-              {/* Collapse / Expand Toggle */}
-              <button
-                onClick={() => setIsBottomCollapsed(!isBottomCollapsed)}
-                className="p-1 rounded hover:bg-space-800 text-slate-400 hover:text-white transition"
-                title={isBottomCollapsed ? 'Expand panel' : 'Collapse panel'}
-              >
-                {isBottomCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
+              {/* Status Indicator & Collapse / Expand Toggle */}
+              <div className="flex items-center space-x-3">
+                <span className="text-[10px] text-slate-500 font-mono tracking-widest hidden md:inline">
+                  ISRO CCSDS TELEMETRY BUS: <span className="text-[#00FF9D]">LOCK-SYNC</span>
+                </span>
+                <button
+                  onClick={() => setIsBottomCollapsed(!isBottomCollapsed)}
+                  className="p-1 rounded border border-[#1E293B] hover:bg-[#111C30] text-slate-400 hover:text-white transition"
+                  title={isBottomCollapsed ? 'Expand panel' : 'Collapse panel'}
+                >
+                  {isBottomCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             {/* Bottom Content Area */}
             {!isBottomCollapsed && (
-              <div className="flex-1 overflow-hidden p-2">
+              <div className="flex-1 overflow-hidden p-2 bg-[#040914]/90">
                 {bottomTab === 'telemetry' && (
                   <TelemetryChart
                     componentDetail={selectedDetail}
@@ -384,7 +392,7 @@ export const App: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL: Component Intelligence (25%) */}
-        <div className="w-1/4 min-w-[300px] max-w-sm h-full flex flex-col">
+        <div className="w-1/4 min-w-[310px] max-w-sm h-full flex flex-col border-l border-[#1E293B]">
           <ComponentIntelligence
             componentDetail={selectedDetail}
             componentResult={selectedResult}
